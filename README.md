@@ -1,38 +1,32 @@
-<!-- Short Description  -->
+---
+title: Proyecto Final
+author: Aldair Bejarano Tortós
+output: github_document
+date: "`r Sys.Date()`"
+editor_options:
+  chunk_output_type: console
+---
 
-This is a short description of the project
+<!-- Proyecto Final Limnología  -->
 
-*Updated on 2026-06-29 10:34:20*
+
+*Updated on `r format(Sys.time(), "%Y-%m-%d %H:%M:%S")`*
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-## Table of contents
+```{r, include = FALSE}
 
-- [General info](#general-info)
-  - [Analyses](#Analyses)
-    - [To do list](#to-do-list)
-      - [Contact](#contact)
+library(rmarkdown)
 
-## General info
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  out.width = "100%"
+)
+```
 
-General information about the project (study system, goals, etc)
 
-## Analysis
-
-- Analysis 1
-
-## In progress
-
-- Something not finished yet
-
-## To-do list
-
-- Do the next analysis
-
-## Status
-
-Project is: *in progress*
+## Estructura General
+En la carpeta scripts se encuentra el archivo qmd que contiene el código con el que se realizó el proyecto.
 
 ## Contact
-
-Created by [Autor name](website_URL)
+Created by [Aldair Bejarano Tortós](aldair.bejarano@ucr.ac.cr)
