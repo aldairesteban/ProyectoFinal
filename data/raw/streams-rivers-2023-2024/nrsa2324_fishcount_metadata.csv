@@ -1,0 +1,20 @@
+COLUMN_NAME,LABEL,LEGAL_VALUES
+ANOM_CT,Total number of anomalies for taxon in sample,
+COUNT_12,Tally of fish between 150 and 300 mm total length,
+COUNT_18,Tally of fish between 300 and 450 mm total length,
+COUNT_19,Tally of fish > 450 mm total length,
+COUNT_6,Tally of fish < 150 mm total length,
+DATE_COL,Date of data collection in field,
+FINAL_NAME,Final common name assigned to fish count data,
+FISH_SAMPLING,Fish Sampling - not conducted or suspended,|NO_FISH|NOT_FISHED_REACH_MIN|NO_PERMIT|SITE_CONDITIONS|PERMIT_RESTRICT|EQUIPMENT_FAILURE|OTHER
+IS_DISTINCT,Distinctness of taxon within sample,0|1
+NON_NATIVE,Non-native status (Y/N),N|Y
+PSTL_CODE,"State two letter postal code for site sampled. 50 state postal codes plus AS, MP, GU, PR, VI for American Samoa, Commonwealth of Northern Marianas, Guam, Puerto Rico and Virgin Islands.  No missing or \blank\"" values allowed.""",
+SAMPLED_FISH,Whether site sampled sufficiently ,
+SITE_ID,"Site ID for the study and year sampled.  Preferred form is NRSnn_MM-xxxxx  where  nn is current cycle year (04, 08, 13, 18, etc), MM is two letter state code, and xxxxx is between 10001 and 99999.  No missing or \blank\"" values allowed.""",
+TOTAL,Total number of individuals for taxon in sample,
+VISIT_NO,Number identifying which visit this is,|1|2
+UID,Unique site visit ID,
+PUBLICATION_DATE,Date of data file publication,
+TAXA_ID,Taxonomic ID number,
+UNIQUE_ID,Unique site ID based on location that does not depend on year sampled or any other factor. Form is NRS_ss_nnnnn  where ss state and nnnnn is number that starts at 10001. No missing values allowed.,

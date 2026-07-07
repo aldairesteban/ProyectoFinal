@@ -1,0 +1,18 @@
+SAMPLE_TYPE,COLUMN_NAME,LABEL,LEGAL_VALUES
+VERIF,DATE_COL,Date of data collection in field,
+ENTE,ENT_1X_CCE_100ML,"Estimated enterococci CCE / 100 mL of water sample volume from ORD analysis of undiluted DNA extracts and  CCE / extract calculations from EPA Method 1609 calculation spreadsheet.  CCE are based on 15:1 calibrator target sequence equivalent (CSE) to CCE ratio established for RWQC guideline values. CCE /  extract was multiplied by 100 ÷ filtered sample volume to obtain final estimate /100 ml. \QC fail\"" denotes analysis results that did not meet Method 1609 control assay acceptance criteria.""",
+ENTE,NARS_FLAG,"Flag assigned by NARS: ND = Non-detect, L = Estimated, Q = Quality-related issue, S = Shipping time exceedence, H = Holding time exceedence, NR = No lab result for analyte",
+DESIGN,PSTL_CODE,"State two letter postal code for site sampled. 50 state postal codes plus AS, MP, GU, PR, VI for American Samoa, Commonwealth of Northern Marianas, Guam, Puerto Rico and Virgin Islands.  No missing or \blank\"" values allowed.""",
+DESIGN,SITE_ID,"Site ID for the study and year sampled.  Preferred form is NRSnn_MM-xxxxx  where  nn is current cycle year (04, 08, 13, 18, etc), MM is two letter state code, and xxxxx is between 10001 and 99999.  No missing or \blank\"" values allowed.""",
+VERIF,VISIT_NO,Number identifying which visit this is,|1|2
+,UID,Unique site visit ID,
+,PUBLICATION_DATE,Date of data file publication,
+,UNIQUE_ID,Unique site ID based on location that does not depend on year sampled or any other factor. Form is NRS_ss_nnnnn  where ss state and nnnnn is number that starts at 10001. No missing values allowed.,
+,ANALYTE,Analyte,
+,BATCH_ID,Laboratory Batch ID,
+,COMMENT,Descriptive comment.,
+,LAB,Laboratory processing sample,
+,MATRIX,"Type of sample (e.g., water, sediment, tissue)",
+,SAM_CODE,"Sample code (e.g., regular, lab duplicate, lab split)",
+,SAMPLE_TYPE,Sample type,
+,UNITS,Units,

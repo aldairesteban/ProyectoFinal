@@ -1,0 +1,25 @@
+SAMPLE_TYPE,COLUMN_NAME,LABEL,LEGAL_VALUES
+TAXA: Invertebrates,CLASS,Class of taxon,
+VERIF,DATE_COL,Date of data collection in field,
+TAXA: Invertebrates,FAMILY,Family of taxon,
+TAXA: Invertebrates,FFG,"Functional feeding group used in metric calculations;Collector-filterer(CF),Collector-gatherer(CG),Parasite(PA),Piercer(PI),Scraper(SC),Shredder(SH)",
+TAXA: Invertebrates,GENUS,Genus of taxon,
+TAXA: Invertebrates,HABIT,"Habit used in metric calculations;Burrower(BU),Climber(CB),Clinger(CN),Diver(DV),Planktonic(PK),Skater(SK),Sprawler(SP),Swimmer(SW)",
+BERW,IS_DISTINCT,Distinctness of taxon within sample,0|1
+BETB,IS_DISTINCT,Distinctness of taxon within sample,0|1
+TAXA: Invertebrates,NON_TARGET,Operational taxon unit for NRSA O/E,
+TAXA: Invertebrates,ORDER,Order of taxon,
+TAXA: Invertebrates,PHYLUM,Phylum of taxon,
+DESIGN,PSTL_CODE,"State two letter postal code for site sampled. 50 state postal codes plus AS, MP, GU, PR, VI for American Samoa, Commonwealth of Northern Marianas, Guam, Puerto Rico and Virgin Islands.  No missing or \blank\"" values allowed.""",
+TAXA: Invertebrates,PTV,Pollution tolerance value as assigned for NWSA,
+,SAMPLE_TYPE,Sample type; BETB = non-wadable method (Benthic Boatable) and BERW = wadeable method (Benthic Reach Wide),
+DESIGN,SITE_ID,"Site ID for the study and year sampled.  Preferred form is NRSnn_MM-xxxxx  where  nn is current cycle year (04, 08, 13, 18, etc), MM is two letter state code, and xxxxx is between 10001 and 99999.  No missing or \blank\"" values allowed.""",
+TAXA: Invertebrates,SUBFAMILY,Subfamily of taxon,
+TAXA: Invertebrates,TARGET_TAXON,Name of taxon at target taxon level,
+,TAXA_ID,Taxonomic ID number,
+BERW,TOTAL,Total number of individuals sorted for given taxon,
+BETB,TOTAL,Total number of individuals sorted for given taxon,
+TAXA: Invertebrates,TRIBE,Tribe of taxon,
+,UID,Unique site visit ID,
+,UNIQUE_ID,Unique site ID based on location that does not depend on year sampled or any other factor. Form is NRS_ss_nnnnn  where ss state and nnnnn is number that starts at 10001. No missing values allowed.,
+VERIF,VISIT_NO,Number identifying which visit this is,|1|2
