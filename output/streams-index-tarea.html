@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aldair Bejarano Tortós">
+
+<title>Tarea: Índice de nutrientes en ríos (NRSA 2018-19 -&gt; 2023-24)</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="streams-index-tarea_files/libs/clipboard/clipboard.min.js"></script>
+<script src="streams-index-tarea_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="streams-index-tarea_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="streams-index-tarea_files/libs/quarto-html/popper.min.js"></script>
+<script src="streams-index-tarea_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="streams-index-tarea_files/libs/quarto-html/anchor.min.js"></script>
+<link href="streams-index-tarea_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="streams-index-tarea_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="streams-index-tarea_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="streams-index-tarea_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="streams-index-tarea_files/libs/bootstrap/bootstrap-efbb37e9afcc02144ebbc7afd12a776f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Tarea: Índice de nutrientes en ríos (NRSA 2018-19 -&gt; 2023-24)</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aldair Bejarano Tortós </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="objetivo" class="level2">
+<h2 class="anchored" data-anchor-id="objetivo">Objetivo</h2>
+<p>En esta tarea vas a construir un flujo de modelado por niveles para predecir fosforo total (TP) en rios.</p>
+<ul>
+<li>Entrenamiento: NRSA 2018-2019</li>
+<li>Validacion externa: NRSA 2023-2024</li>
+<li>Regla simplificada: usar solo <code>VISIT_NO == 1</code> y <code>SAM_CODE == "REGULAR"</code></li>
+</ul>
+<p>La construccion es acumulativa:</p>
+<ol type="1">
+<li>Modelo 1: Chl-a -&gt; TP</li>
+<li>Modelo 2: Chl-a + biomasa de perifiton -&gt; TP</li>
+<li>Modelo 3: Chl-a + biomasa + TP inferido por promedio ponderado de invertebrados -&gt; TP</li>
+</ol>
+<p>Al final, usarás peces para interpretación ecológica (no como predictor del modelo).</p>
+<p>Recuerda que los surveys no tienen translape entre años, entonces, no podemos predecir los mismos sitios con cuales entrenamos los modelos. Solo se puede entrenar en 2018-19 y validar en 2023-24. Que no hay translape entre encuestas es una ventaja para evaluar la robustez de los modelos.</p>
+</section>
+<section id="cargar-paquetes" class="level2">
+<h2 class="anchored" data-anchor-id="cargar-paquetes">1. Cargar paquetes</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"readr"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"dplyr"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tidyr"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"ggplot2"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"car"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"FSA"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="funciones-utiles-para-evaluar-modelos" class="level2">
+<h2 class="anchored" data-anchor-id="funciones-utiles-para-evaluar-modelos">1.1 Funciones utiles para evaluar modelos</h2>
+<p>No necesitas calcular metricas a mano. Define estas funciones una sola vez y usalas en los niveles 1, 2 y 3.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Metricas de validacion externa (observado vs predicho)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>calc_rmse <span class="ot">&lt;-</span> <span class="cf">function</span>(obs, pred) {</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="fu">mean</span>((obs <span class="sc">-</span> pred)<span class="sc">^</span><span class="dv">2</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>calc_mae <span class="ot">&lt;-</span> <span class="cf">function</span>(obs, pred) {</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">abs</span>(obs <span class="sc">-</span> pred), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>calc_bias <span class="ot">&lt;-</span> <span class="cf">function</span>(obs, pred) {</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(pred <span class="sc">-</span> obs, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>calc_r2 <span class="ot">&lt;-</span> <span class="cf">function</span>(obs, pred) {</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  stats<span class="sc">::</span><span class="fu">cor</span>(obs, pred, <span class="at">use =</span> <span class="st">"complete.obs"</span>)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Esta funcion regresa una fila con todas las metricas</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># `data` es un data.frame con columnas de observado y predicho</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># `obs_col` y `pred_col` son nombres de columna (string)</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># `model_name` es un string para identificar el modelo</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>model_metrics <span class="ot">&lt;-</span> <span class="cf">function</span>(data, obs_col, pred_col, model_name) {</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">modelo =</span> model_name,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_test =</span> <span class="fu">sum</span>(stats<span class="sc">::</span><span class="fu">complete.cases</span>(data[, <span class="fu">c</span>(obs_col, pred_col)])),</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">r2 =</span> <span class="fu">calc_r2</span>(data[[obs_col]], data[[pred_col]]),</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">rmse =</span> <span class="fu">calc_rmse</span>(data[[obs_col]], data[[pred_col]]),</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">mae =</span> <span class="fu">calc_mae</span>(data[[obs_col]], data[[pred_col]]),</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">sesgo =</span> <span class="fu">calc_bias</span>(data[[obs_col]], data[[pred_col]])</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Proporciona una definicion corta de cada metrica en tu entrega en palabras propias. Trata de interpretar el codigo de las funciones para entender que hace cada metrica. Por ejemplo:</p>
+<ul>
+<li>R2: La correlacion entre observado y predicho, indica que tan bien el modelo explica la variabilidad de los datos.</li>
+<li>RMSE: Las siglas representan Root Mean Square Error, se usa para medir la diferencia promedio entre los valores reales (observados) y los predichos por el modelo. Entre menor sea el valor, más preciso es el modelo.</li>
+<li>MAE: Representa el error absoluto medio (Mean Absolute Error), mide la magnitud promedio de los errores entre los valores reales (observados) y los predichos por el modelo. Como es absoluto no importa si la magnitud es positiva o negativa, se usa para evaluar la precisión del modelo.</li>
+<li>Sesgo: Es el error sistemático que ocurre cuando el modelo tiende a sobreestimar o subestimar los valores reales. Es como el MAE pero indica hacia dónde se está inclinando el modelo.</li>
+</ul>
+<p>Tambien puedes extraer informacion del ajuste del modelo (en entrenamiento) con funciones de R base:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ejemplo general para un modelo lineal llamado m1</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(m1)$r.squared      -&gt; R2 en train</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(m1)$adj.r.squared  -&gt; R2 ajustado en train</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># sigma(m1)                  -&gt; error residual del modelo</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># AIC(m1)                    -&gt; AIC (comparacion entre modelos)</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># BIC(m1)                    -&gt; BIC (comparacion entre modelos)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="log-transformaciones-y-manejo-de-ceros" class="level2">
+<h2 class="anchored" data-anchor-id="log-transformaciones-y-manejo-de-ceros">1.2 Log-transformaciones y manejo de ceros</h2>
+<p>Antes de usar log10, revisa si hay ceros.</p>
+<ul>
+<li>Si una variable tiene solo valores positivos, usa log10 directo.</li>
+<li>Si incluye ceros, usa una de estas estrategias y reportala en tu entrega:
+<ol type="1">
+<li>Filtrar ceros para ese analisis.</li>
+<li>Usar un desplazamiento pequeno: log10(x + c), con c basado en el minimo positivo.</li>
+</ol></li>
+</ul>
+</section>
+<section id="cargar-archivos-principales" class="level2">
+<h2 class="anchored" data-anchor-id="cargar-archivos-principales">2. Cargar archivos principales</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2018-2019 (entrenamiento)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>chem_1819 <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"../data/raw/streams-rivers-2018-2019/nrsa_1819_water_chemistry_chla_-_data.csv"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>pchl_1819 <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"../data/raw/streams-rivers-2018-2019/NRSA_1819_PeriChla.csv"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>pbio_1819 <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"../data/raw/streams-rivers-2018-2019/NRSA_1819_pbio_0.csv"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>inv_1819  <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"../data/raw/streams-rivers-2018-2019/nrsa_1819_benthic_macroinvertebrate_count_-_data.csv"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>fish_1819 <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"../data/raw/streams-rivers-2018-2019/nrsa-1819-fish-count-data.csv"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 2023-2024 (validacion externa)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>chem_2324 <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"../data/raw/streams-rivers-2023-2024/nrsa2324_waterchemistry.csv"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>pchl_2324 <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"../data/raw/streams-rivers-2023-2024/nrsa2324_periphytonchlorophyll-a.csv"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>pbio_2324 <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"../data/raw/streams-rivers-2023-2024/nrsa2324_periphytonbiomass.csv"</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>inv_2324  <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"../data/raw/streams-rivers-2023-2024/nrsa2324_benthiccount.csv"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>fish_2324 <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"../data/raw/streams-rivers-2023-2024/nrsa2324_fishcount.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Chequeo rapido:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">tabla =</span> <span class="fu">c</span>(<span class="st">"chem_1819"</span>, <span class="st">"pchl_1819"</span>, <span class="st">"pbio_1819"</span>, <span class="st">"inv_1819"</span>, <span class="st">"fish_1819"</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>            <span class="st">"chem_2324"</span>, <span class="st">"pchl_2324"</span>, <span class="st">"pbio_2324"</span>, <span class="st">"inv_2324"</span>, <span class="st">"fish_2324"</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">filas =</span> <span class="fu">c</span>(<span class="fu">nrow</span>(chem_1819), <span class="fu">nrow</span>(pchl_1819), <span class="fu">nrow</span>(pbio_1819), <span class="fu">nrow</span>(inv_1819), <span class="fu">nrow</span>(fish_1819),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">nrow</span>(chem_2324), <span class="fu">nrow</span>(pchl_2324), <span class="fu">nrow</span>(pbio_2324), <span class="fu">nrow</span>(inv_2324), <span class="fu">nrow</span>(fish_2324))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+   tabla     filas
+   &lt;chr&gt;     &lt;int&gt;
+ 1 chem_1819  2112
+ 2 pchl_1819  2112
+ 3 pbio_1819  1038
+ 4 inv_1819  87079
+ 5 fish_1819 22057
+ 6 chem_2324  2172
+ 7 pchl_2324  2130
+ 8 pbio_2324  2130
+ 9 inv_2324  87940
+10 fish_2324 19925</code></pre>
+</div>
+</div>
+</section>
+<section id="punteros-de-join-importante" class="level2">
+<h2 class="anchored" data-anchor-id="punteros-de-join-importante">2.1 Punteros de join (importante)</h2>
+<p>Antes de unir tablas, usa estas reglas:</p>
+<ol type="1">
+<li>No unir 2018-2019 con 2023-2024 fila a fila. Se usan como train y test separados.</li>
+<li>2018 PeriChla: no confies en <code>UID</code> para unir con quimica. Para esa combinacion, usa <code>SITE_ID + VISIT_NO + DATE_COL</code>.</li>
+<li>2023-2024 PeriChla y PeriBiomasa: <code>UID</code> funciona bien; si hay ambiguedad, usa respaldo <code>SITE_ID + VISIT_NO + DATE_COL</code>.</li>
+<li>Antes de cada <code>left_join</code>, confirma que la tabla de la derecha tiene una sola fila por llave (si no, se duplican filas del modelo).</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper para revisar si una llave es unica en una tabla</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>check_key_uniqueness <span class="ot">&lt;-</span> <span class="cf">function</span>(data, keys) {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">count</span>(dplyr<span class="sc">::</span><span class="fu">across</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(keys)), <span class="at">name =</span> <span class="st">"n"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nrow</span>()</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Ejemplo:</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">check_key_uniqueness</span>(pchl_1819, <span class="fu">c</span>(<span class="st">"SITE_ID"</span>, <span class="st">"VISIT_NO"</span>, <span class="st">"DATE_COL"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_key_uniqueness</span>(pchl_1819, <span class="fu">c</span>(<span class="st">"UID"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_key_uniqueness</span>(pchl_2324, <span class="fu">c</span>(<span class="st">"SITE_ID"</span>, <span class="st">"VISIT_NO"</span>, <span class="st">"DATE_COL"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_key_uniqueness</span>(pchl_2324, <span class="fu">c</span>(<span class="st">"UID"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+</section>
+<section id="preparar-tablas-base-solo-visita-1-y-muestras-regulares" class="level2">
+<h2 class="anchored" data-anchor-id="preparar-tablas-base-solo-visita-1-y-muestras-regulares">3. Preparar tablas base (solo visita 1 y muestras regulares)</h2>
+<section id="tp-desde-quimica" class="level3">
+<h3 class="anchored" data-anchor-id="tp-desde-quimica">3.1 TP desde quimica</h3>
+<p>Usa <code>PTL_RESULT</code> como TP en ambas encuestas.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>tp_1819 <span class="ot">&lt;-</span> chem_1819 <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, SAM_CODE <span class="sc">==</span> <span class="st">"REGULAR"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">transmute</span>(<span class="at">uid =</span> UID, <span class="at">site =</span> SITE_ID, <span class="at">visit =</span> VISIT_NO, <span class="at">tp =</span> PTL_RESULT)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>tp_2324 <span class="ot">&lt;-</span> chem_2324 <span class="sc">|&gt;</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, SAM_CODE <span class="sc">==</span> <span class="st">"REGULAR"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">transmute</span>(<span class="at">uid =</span> UID, <span class="at">site =</span> SITE_ID, <span class="at">visit =</span> VISIT_NO, <span class="at">tp =</span> PTL_RESULT)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="chl-a-de-perifiton" class="level3">
+<h3 class="anchored" data-anchor-id="chl-a-de-perifiton">3.2 Chl-a de perifiton</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Objetivo: crear pchl_train y pchl_test con columnas: uid, site, visit, chla_peri</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Puntero clave de join:</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># - En 2018, para enlazar peri-Chla con quimica usa SITE_ID + VISIT_NO + DATE_COL.</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># - En 2023-24, UID suele funcionar bien.</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>pchl_train<span class="ot">&lt;-</span>pchl_1819 <span class="sc">|&gt;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, SAM_CODE <span class="sc">==</span> <span class="st">"REGULAR"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">site =</span> SITE_ID, <span class="at">visit =</span> VISIT_NO, <span class="at">chla_peri =</span> RESULT_VOL)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>pchl_test<span class="ot">&lt;-</span>pchl_2324 <span class="sc">|&gt;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, SAM_CODE <span class="sc">==</span> <span class="st">"REGULAR"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">site =</span> SITE_ID, <span class="at">visit =</span> VISIT_NO, <span class="at">chla_peri =</span> RESULT_VOL)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="biomasa-de-perifiton" class="level3">
+<h3 class="anchored" data-anchor-id="biomasa-de-perifiton">3.3 Biomasa de perifiton</h3>
+<p>Filtra <code>ANALYTE == "AFDM"</code> para biomasa seca libre de cenizas.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Objetivo: crear pbio_train y pbio_test con columnas: uid, site, visit, bio_peri</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>pbio_train <span class="ot">&lt;-</span> pbio_1819 <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, SAM_CODE <span class="sc">==</span> <span class="st">"REGULAR"</span>, ANALYTE <span class="sc">==</span> <span class="st">"AFDM"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">site =</span> SITE_ID, <span class="at">visit =</span> VISIT_NO, <span class="at">bio_peri =</span> RESULT_VOL)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>pbio_test <span class="ot">&lt;-</span> pbio_2324 <span class="sc">|&gt;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, SAM_CODE <span class="sc">==</span> <span class="st">"REGULAR"</span>, ANALYTE <span class="sc">==</span> <span class="st">"AFDM"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">site =</span> SITE_ID, <span class="at">visit =</span> VISIT_NO, <span class="at">bio_peri =</span> RESULT_VOL)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">#Elijo esta medida porque tiene mayor cantidad de mediciones</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="construir-tablas-de-modelado-traintest" class="level3">
+<h3 class="anchored" data-anchor-id="construir-tablas-de-modelado-traintest">3.4 Construir tablas de modelado train/test</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Antes de unir: verifica una fila por llave en pchl_* y pbio_* para evitar</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co"># multiplicar filas de train_base/test_base.</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>pbio_train <span class="sc">|&gt;</span> <span class="fu">count</span>(site, visit) <span class="sc">|&gt;</span> <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 3
+# ℹ 3 variables: site &lt;chr&gt;, visit &lt;dbl&gt;, n &lt;int&gt;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pchl_train <span class="sc">|&gt;</span> <span class="fu">count</span>(site, visit) <span class="sc">|&gt;</span> <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 3
+  site           visit     n
+  &lt;chr&gt;          &lt;dbl&gt; &lt;int&gt;
+1 NRS18_MN_RF001     1     2
+2 NRS18_MN_RF002     1     2</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hay un par de duplicados</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>pchl_train <span class="ot">&lt;-</span> pchl_train <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(site, visit) <span class="sc">|&gt;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">chla_peri =</span> <span class="fu">mean</span>(chla_peri, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>pchl_train <span class="sc">|&gt;</span> <span class="fu">count</span>(site, visit) <span class="sc">|&gt;</span> <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 3
+# ℹ 3 variables: site &lt;chr&gt;, visit &lt;dbl&gt;, n &lt;int&gt;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>pbio_test <span class="sc">|&gt;</span> <span class="fu">count</span>(site, visit) <span class="sc">|&gt;</span> <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 38 × 3
+   site           visit     n
+   &lt;chr&gt;          &lt;dbl&gt; &lt;int&gt;
+ 1 NRS23_CA_HP001     1     2
+ 2 NRS23_CA_HP005     1     2
+ 3 NRS23_CA_HP006     1     2
+ 4 NRS23_FL_HP001     1     2
+ 5 NRS23_IA_HP001     1     2
+ 6 NRS23_KS_HP001     1     2
+ 7 NRS23_KY_HP001     1     2
+ 8 NRS23_KY_HP002     1     2
+ 9 NRS23_ME_HP001     1     2
+10 NRS23_ME_HP003     1     2
+# ℹ 28 more rows</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>pchl_test<span class="sc">|&gt;</span> <span class="fu">count</span>(site, visit) <span class="sc">|&gt;</span> <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 38 × 3
+   site           visit     n
+   &lt;chr&gt;          &lt;dbl&gt; &lt;int&gt;
+ 1 NRS23_CA_HP001     1     2
+ 2 NRS23_CA_HP005     1     2
+ 3 NRS23_CA_HP006     1     2
+ 4 NRS23_FL_HP001     1     2
+ 5 NRS23_IA_HP001     1     2
+ 6 NRS23_KS_HP001     1     2
+ 7 NRS23_KY_HP001     1     2
+ 8 NRS23_KY_HP002     1     2
+ 9 NRS23_ME_HP001     1     2
+10 NRS23_ME_HP003     1     2
+# ℹ 28 more rows</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hay duplicados</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>pchl_test<span class="ot">&lt;-</span> pchl_test <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(site, visit) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">chla_peri =</span> <span class="fu">mean</span>(chla_peri, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>pbio_test <span class="ot">&lt;-</span> pbio_test <span class="sc">|&gt;</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(site, visit) <span class="sc">|&gt;</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">bio_peri =</span> <span class="fu">mean</span>(bio_peri, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>pbio_test <span class="sc">|&gt;</span> <span class="fu">count</span>(site, visit) <span class="sc">|&gt;</span> <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 3
+# ℹ 3 variables: site &lt;chr&gt;, visit &lt;dbl&gt;, n &lt;int&gt;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>pchl_test<span class="sc">|&gt;</span> <span class="fu">count</span>(site, visit) <span class="sc">|&gt;</span> <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 3
+# ℹ 3 variables: site &lt;chr&gt;, visit &lt;dbl&gt;, n &lt;int&gt;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>train_base <span class="ot">&lt;-</span> tp_1819 <span class="sc">|&gt;</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(pchl_train, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(pbio_train, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(uid,site, visit, tp, chla_peri, bio_peri)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>train_base <span class="ot">&lt;-</span> train_base <span class="sc">|&gt;</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(site, visit) <span class="sc">|&gt;</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">tp =</span> <span class="fu">mean</span>(tp, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">chla_peri =</span> <span class="fu">mean</span>(chla_peri, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">bio_peri =</span> <span class="fu">mean</span>(bio_peri, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>test_base <span class="ot">&lt;-</span> tp_2324 <span class="sc">|&gt;</span></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(pchl_test, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(pbio_test, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(uid,site, visit, tp, chla_peri, bio_peri)</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>test_base <span class="ot">&lt;-</span> test_base <span class="sc">|&gt;</span></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(site, visit) <span class="sc">|&gt;</span></span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">tp =</span> <span class="fu">mean</span>(tp, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">chla_peri =</span> <span class="fu">mean</span>(chla_peri, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">bio_peri =</span> <span class="fu">mean</span>(bio_peri, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a><span class="co">#Elimino los uid porque estaban duplicados en algunos casos, entonces promedio los valores de los sitios duplicados</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="eda-minima-antes-de-modelar" class="level2">
+<h2 class="anchored" data-anchor-id="eda-minima-antes-de-modelar">4. EDA minima antes de modelar</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Sugerencias:</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) resumen de NA por variable en train_base y test_base</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) histogramas de tp, chla_peri, bio_peri</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) decidir transformacion log10 para TP y predictores</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>na_train <span class="ot">&lt;-</span> train_base <span class="sc">|&gt;</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">|&gt;</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"na_count"</span>)</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Hay bastantes NA en bio_peri</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>na_test <span class="ot">&lt;-</span> test_base <span class="sc">|&gt;</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">|&gt;</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"na_count"</span>)</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Hay mucho menos NA que en la base de entrenamiento</span></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>train_base <span class="sc">|&gt;</span></span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(tp, chla_peri, bio_peri) <span class="sc">|&gt;</span></span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"valor"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> valor, <span class="at">fill =</span> variable)) <span class="sc">+</span></span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">bins =</span> <span class="dv">30</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span> </span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Análisis de Distribución de base de calibracion"</span>, <span class="at">x =</span> <span class="st">"Valor de la Variable"</span>, <span class="at">y =</span> <span class="st">"Frecuencia"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Las tres variables tienen distribuciones sesgadas a la derecha, entonces aplicar log10 a todos puede ayudar. Sin embargo, para tp hay un valor negativo, que posiblemente se deba a un error introduciendo datos, pero como no se tiene certeza, es mejor aplicar filtros para descartar esa fila.</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>train_base <span class="sc">|&gt;</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(tp, chla_peri, bio_peri) <span class="sc">|&gt;</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"valor"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log10</span>(valor), <span class="at">fill =</span> variable)) <span class="sc">+</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">bins =</span> <span class="dv">30</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span> </span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Análisis de Distribución de base de calibracion con transformaciones de log10"</span>, <span class="at">x =</span> <span class="st">"Valor de la Variable"</span>, <span class="at">y =</span> <span class="st">"Frecuencia"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="nivel-1-modelo-chl-a---tp" class="level2">
+<h2 class="anchored" data-anchor-id="nivel-1-modelo-chl-a---tp">5. Nivel 1: modelo Chl-a -&gt; TP</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) crear train_m1 y test_m1 con casos completos</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) ajustar: log10(tp) ~ log10(chla_peri)</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) predecir en test_m1</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 4) guardar metricas con model_metrics(...)</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Sugerencia de nombres:</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="co"># m1 &lt;- lm(log10(tp) ~ log10(chla_peri), data = train_m1)</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="co"># test_m1$pred_logtp_m1 &lt;- predict(m1, newdata = test_m1)</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="co"># metricas_m1 &lt;- model_metrics(test_m1, obs_col = "logtp", pred_col = "pred_logtp_m1", model_name = "Nivel 1")</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Si creas logtp antes, usa: train_m1 &lt;- mutate(train_m1, logtp = log10(tp))</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="co">#                         y: test_m1  &lt;- mutate(test_m1,  logtp = log10(tp))</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>train_m1<span class="ot">&lt;-</span> train_base <span class="sc">|&gt;</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(tp<span class="sc">&gt;</span><span class="dv">0</span>, chla_peri<span class="sc">&gt;</span><span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">logtp =</span> <span class="fu">log10</span>(tp), <span class="at">logchla =</span> <span class="fu">log10</span>(chla_peri))</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>test_m1<span class="ot">&lt;-</span> test_base <span class="sc">|&gt;</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(tp<span class="sc">&gt;</span><span class="dv">0</span>, chla_peri<span class="sc">&gt;</span><span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">logtp =</span> <span class="fu">log10</span>(tp), <span class="at">logchla =</span> <span class="fu">log10</span>(chla_peri))</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>m1<span class="ot">&lt;-</span> <span class="fu">lm</span>(logtp <span class="sc">~</span> logchla, <span class="at">data =</span> train_m1)</span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>test_m1<span class="sc">$</span>pred_logtp_m1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(m1, <span class="at">newdata =</span> test_m1)</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>metricas <span class="ot">&lt;-</span> <span class="fu">model_metrics</span>(test_m1, <span class="at">obs_col =</span> <span class="st">"logtp"</span>, <span class="at">pred_col =</span> <span class="st">"pred_logtp_m1"</span>, <span class="at">model_name =</span> <span class="st">"Nivel 1"</span>)</span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Este no es un buen modelo, tiene un R2 muy bajo.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="nivel-2-modelo-chl-a-biomasa---tp" class="level2">
+<h2 class="anchored" data-anchor-id="nivel-2-modelo-chl-a-biomasa---tp">6. Nivel 2: modelo Chl-a + biomasa -&gt; TP</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) crear train_m2 y test_m2 con casos completos</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) ajustar: log10(tp) ~ log10(chla_peri) + log10(bio_peri)</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) predecir en test_m2</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 4) guardar metricas con model_metrics(...)</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>train_m2<span class="ot">&lt;-</span> train_base <span class="sc">|&gt;</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(tp<span class="sc">&gt;</span><span class="dv">0</span>, chla_peri<span class="sc">&gt;</span><span class="dv">0</span>,bio_peri<span class="sc">&gt;</span><span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">logtp =</span> <span class="fu">log10</span>(tp), <span class="at">logchla =</span> <span class="fu">log10</span>(chla_peri),<span class="at">logbio =</span> <span class="fu">log10</span>(bio_peri))</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>test_m2<span class="ot">&lt;-</span> test_base <span class="sc">|&gt;</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(tp<span class="sc">&gt;</span><span class="dv">0</span>,chla_peri<span class="sc">&gt;</span><span class="dv">0</span>,bio_peri<span class="sc">&gt;</span><span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">logtp =</span> <span class="fu">log10</span>(tp), <span class="at">logchla =</span> <span class="fu">log10</span>(chla_peri),<span class="at">logbio =</span> <span class="fu">log10</span>(bio_peri))</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>m2<span class="ot">&lt;-</span> <span class="fu">lm</span>(logtp <span class="sc">~</span> logchla <span class="sc">+</span> logbio, <span class="at">data =</span> train_m2)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>test_m2<span class="sc">$</span>pred_logtp_m2 <span class="ot">&lt;-</span> <span class="fu">predict</span>(m2, <span class="at">newdata =</span> test_m2)</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>metricas_m2 <span class="ot">&lt;-</span> <span class="fu">model_metrics</span>(test_m2, <span class="at">obs_col =</span> <span class="st">"logtp"</span>, <span class="at">pred_col =</span> <span class="st">"pred_logtp_m2"</span>, <span class="at">model_name =</span> <span class="st">"Nivel 2"</span>)</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>metricas <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(metricas, metricas_m2)</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Las mediciones se mantienen similares e incluso un poco peores</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Diagnostico de colinealidad:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(<span class="fu">log10</span>(train_base<span class="sc">$</span>chla_peri),</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>         <span class="fu">log10</span>(train_base<span class="sc">$</span>bio_peri),</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">method =</span> <span class="st">"pearson"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's product-moment correlation
+
+data:  log10(train_base$chla_peri) and log10(train_base$bio_peri)
+t = 5.6877, df = 901, p-value = 1.74e-08
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.1224180 0.2483929
+sample estimates:
+      cor 
+0.1861705 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">vif</span>(m2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> logchla   logbio 
+1.035941 1.035941 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Preguntas:</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="co"># - chla_peri y bio_peri estan correlacionadas?</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="co"># La prueba de correlación de Pearson muestra que hay una correlación significativa entre los logaritmos de las variables (r2=0.18, p&lt;0.001)</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="co"># - ambas aportan de manera independiente?</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="co"># El vif fue de 1.035 lo que indica una colinearidad practicamente nula, lo que significa que ambas aportan de forma independiente.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="wa-con-invertebrados-entrenado-en-2018-19" class="level2">
+<h2 class="anchored" data-anchor-id="wa-con-invertebrados-entrenado-en-2018-19">7. WA con invertebrados (entrenado en 2018-19)</h2>
+<section id="preparar-abundancias-de-invertebrados" class="level3">
+<h3 class="anchored" data-anchor-id="preparar-abundancias-de-invertebrados">7.1 Preparar abundancias de invertebrados</h3>
+<p>Sugerencias:</p>
+<ul>
+<li>usar solo <code>VISIT_NO == 1</code></li>
+<li>usar <code>IS_DISTINCT == 1</code></li>
+<li>usar <code>TOTAL</code> como abundancia</li>
+<li>agrupar por taxon objetivo (<code>TARGET_TAXON</code>)</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>inv_train_long<span class="ot">&lt;-</span>inv_1819<span class="sc">|&gt;</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, IS_DISTINCT <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(SITE_ID, VISIT_NO, TARGET_TAXON) <span class="sc">|&gt;</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">abundance =</span> <span class="fu">sum</span>(TOTAL, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">site =</span> SITE_ID, <span class="at">visit =</span> VISIT_NO, <span class="at">taxon =</span> TARGET_TAXON, abundance)  </span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>inv_test_long<span class="ot">&lt;-</span>inv_2324<span class="sc">|&gt;</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, IS_DISTINCT <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(SITE_ID, VISIT_NO, TARGET_TAXON) <span class="sc">|&gt;</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">abundance =</span> <span class="fu">sum</span>(TOTAL, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">site =</span> SITE_ID, <span class="at">visit =</span> VISIT_NO, <span class="at">taxon =</span> TARGET_TAXON, abundance)  </span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Objetivo:</span></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="co"># inv_train_long: uid, site, visit, taxon, abundance</span></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a><span class="co"># inv_test_long:  uid, site, visit, taxon, abundance</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="calcular-optimos-de-tp-por-taxon-train" class="level3">
+<h3 class="anchored" data-anchor-id="calcular-optimos-de-tp-por-taxon-train">7.2 Calcular optimos de TP por taxon (train)</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>inv_optima <span class="ot">&lt;-</span> inv_train_long <span class="sc">|&gt;</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">left_join</span>(train_base<span class="sc">|&gt;</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">filter</span>(tp<span class="sc">&gt;</span><span class="dv">0</span>)<span class="sc">|&gt;</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">log_tp =</span> <span class="fu">log10</span>(tp)),</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(log_tp), <span class="sc">!</span><span class="fu">is.na</span>(abundance)) <span class="sc">|&gt;</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(taxon) <span class="sc">|&gt;</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">optimum_logtp =</span> <span class="fu">sum</span>(log_tp<span class="sc">*</span>abundance)<span class="sc">/</span><span class="fu">sum</span>(abundance),</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Formula:</span></span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a><span class="co"># optimum = sum(log10(tp) * abundance) / sum(abundance)</span></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Salida esperada: inv_optima (taxon, optimum_logtp)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="inferir-tp-por-wa-en-sitios-traintest" class="level3">
+<h3 class="anchored" data-anchor-id="inferir-tp-por-wa-en-sitios-traintest">7.3 Inferir TP por WA en sitios train/test</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>wa_inv_train <span class="ot">&lt;-</span> inv_train_long <span class="sc">|&gt;</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(inv_optima, <span class="at">by =</span> <span class="st">"taxon"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(site, visit) <span class="sc">|&gt;</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">logtp_wa =</span> <span class="fu">sum</span>(optimum_logtp <span class="sc">*</span> abundance) <span class="sc">/</span> <span class="fu">sum</span>(abundance),</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">tp_wa_inv =</span> <span class="dv">10</span><span class="sc">^</span>logtp_wa,</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>wa_inv_test <span class="ot">&lt;-</span> inv_test_long <span class="sc">|&gt;</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(inv_optima, <span class="at">by =</span> <span class="st">"taxon"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(site, visit) <span class="sc">|&gt;</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">logtp_wa =</span> <span class="fu">sum</span>(optimum_logtp <span class="sc">*</span> abundance) <span class="sc">/</span> <span class="fu">sum</span>(abundance),</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">tp_wa_inv =</span> <span class="dv">10</span><span class="sc">^</span>logtp_wa,</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Salidas esperadas:</span></span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a><span class="co"># wa_inv_train: uid, site, visit, tp_wa_inv</span></span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a><span class="co"># wa_inv_test:  uid, site, visit, tp_wa_inv</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="sensibilidad-a-taxa-raros-repetir-wa-antesdespues-de-filtrar" class="level3">
+<h3 class="anchored" data-anchor-id="sensibilidad-a-taxa-raros-repetir-wa-antesdespues-de-filtrar">7.4 Sensibilidad a taxa raros: repetir WA antes/despues de filtrar</h3>
+<p>Ahora repite el indice WA removiendo taxa raros y compara contra la version original.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Paso A: definir taxa validos en train</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>taxa_validos <span class="ot">&lt;-</span> inv_train_long <span class="sc">|&gt;</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(taxon) <span class="sc">|&gt;</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_sites =</span> dplyr<span class="sc">::</span><span class="fu">n_distinct</span>(site),</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_abundance =</span> <span class="fu">sum</span>(abundance, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(n_sites <span class="sc">&gt;=</span> <span class="dv">5</span>, total_abundance <span class="sc">&gt;=</span> <span class="dv">20</span>)</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Paso B: crear versiones filtradas</span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>inv_train_long_f <span class="ot">&lt;-</span> inv_train_long <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">semi_join</span>(taxa_validos, <span class="at">by =</span> <span class="st">"taxon"</span>)</span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>inv_test_long_f  <span class="ot">&lt;-</span> inv_test_long  <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">semi_join</span>(taxa_validos, <span class="at">by =</span> <span class="st">"taxon"</span>)</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Paso C: recalcular optimos y WA por sitio con la version filtrada</span></span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>inv_optima_f <span class="ot">&lt;-</span> inv_train_long_f <span class="sc">|&gt;</span></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">left_join</span>(train_base <span class="sc">|&gt;</span></span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">filter</span>(tp<span class="sc">&gt;</span><span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">log_tp =</span> <span class="fu">log10</span>(tp)),</span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)</span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(log_tp), <span class="sc">!</span><span class="fu">is.na</span>(abundance)) <span class="sc">|&gt;</span></span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(taxon) <span class="sc">|&gt;</span></span>
+<span id="cb45-25"><a href="#cb45-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb45-26"><a href="#cb45-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">optimum_logtp =</span> <span class="fu">sum</span>(log_tp<span class="sc">*</span>abundance)<span class="sc">/</span><span class="fu">sum</span>(abundance),</span>
+<span id="cb45-27"><a href="#cb45-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb45-28"><a href="#cb45-28" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb45-29"><a href="#cb45-29" aria-hidden="true" tabindex="-1"></a>wa_inv_train_f<span class="ot">&lt;-</span> inv_train_long_f <span class="sc">|&gt;</span></span>
+<span id="cb45-30"><a href="#cb45-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(inv_optima_f, <span class="at">by =</span> <span class="st">"taxon"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb45-31"><a href="#cb45-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(site, visit) <span class="sc">|&gt;</span></span>
+<span id="cb45-32"><a href="#cb45-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">logtp_wa_f =</span> <span class="fu">sum</span>(optimum_logtp <span class="sc">*</span> abundance) <span class="sc">/</span> <span class="fu">sum</span>(abundance),</span>
+<span id="cb45-33"><a href="#cb45-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">tp_wa_inv_f =</span> <span class="dv">10</span><span class="sc">^</span>logtp_wa_f,</span>
+<span id="cb45-34"><a href="#cb45-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb45-35"><a href="#cb45-35" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb45-36"><a href="#cb45-36" aria-hidden="true" tabindex="-1"></a>wa_inv_test_f <span class="ot">&lt;-</span> inv_test_long_f <span class="sc">|&gt;</span></span>
+<span id="cb45-37"><a href="#cb45-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(inv_optima_f, <span class="at">by =</span> <span class="st">"taxon"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb45-38"><a href="#cb45-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(site, visit) <span class="sc">|&gt;</span></span>
+<span id="cb45-39"><a href="#cb45-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">logtp_wa_f =</span> <span class="fu">sum</span>(optimum_logtp <span class="sc">*</span> abundance) <span class="sc">/</span> <span class="fu">sum</span>(abundance),</span>
+<span id="cb45-40"><a href="#cb45-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">tp_wa_inv_f =</span> <span class="dv">10</span><span class="sc">^</span>logtp_wa_f,</span>
+<span id="cb45-41"><a href="#cb45-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb45-42"><a href="#cb45-42" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb45-43"><a href="#cb45-43" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(wa_inv_test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1909</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(wa_inv_test_f)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1909</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Salidas esperadas:</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="co"># wa_inv_train_f: uid, site, visit, tp_wa_inv_f</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="co"># wa_inv_test_f:  uid, site, visit, tp_wa_inv_f</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="comparar-wa-completo-vs-wa-filtrado-y-elegir-uno" class="level3">
+<h3 class="anchored" data-anchor-id="comparar-wa-completo-vs-wa-filtrado-y-elegir-uno">7.5 Comparar WA completo vs WA filtrado y elegir uno</h3>
+<p>Si el WA pre-filtrado da mejor ajuste en test, usa ese predictor en el modelo final.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) construir una tabla de comparacion en test para WA-only</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="co">#    (mismo y en ambos casos)</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>wa_test_compare<span class="ot">&lt;-</span>test_base <span class="sc">|&gt;</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wa_inv_test, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wa_inv_test_f, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>))<span class="sc">|&gt;</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(site, visit, tp, tp_wa_inv, tp_wa_inv_f)</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Ejemplo de evaluacion con metricas en test:</span></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="co"># wa_test_compare &lt;- test_base |&gt;</span></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::left_join(wa_inv_test, by = c("uid", "site", "visit")) |&gt;</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::left_join(wa_inv_test_f, by = c("uid", "site", "visit")) |&gt;</span></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(logtp = log(tp + 0.01)))</span></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a>metricas_wa_all  <span class="ot">&lt;-</span> <span class="fu">model_metrics</span>(wa_test_compare, <span class="st">"tp"</span>, <span class="st">"tp_wa_inv"</span>,   <span class="st">"WA completo"</span>)</span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a>metricas_wa_filt <span class="ot">&lt;-</span> <span class="fu">model_metrics</span>(wa_test_compare, <span class="st">"tp"</span>, <span class="st">"tp_wa_inv_f"</span>, <span class="st">"WA filtrado"</span>)</span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a><span class="fu">bind_rows</span>(metricas_wa_all, metricas_wa_filt)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 6
+  modelo      n_test     r2  rmse   mae sesgo
+  &lt;chr&gt;        &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 WA completo    976 0.0474  713.  159. -137.
+2 WA filtrado   1907 0.0514  543.  127. -105.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) definir el predictor seleccionado para nivel 3:</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="co">#    tp_wa_inv_sel = tp_wa_inv_f si WA filtrado mejora (por ejemplo menor RMSE),</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="co">#    de lo contrario tp_wa_inv.</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="co"># El WA filtrado tiene menor RMSE, mayor R2, menor mae y  menor sesgo, por lo cual lo elijo para el modelo 3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="nivel-3-modelo-combinado-chl-a-biomasa-wa-invertebrados" class="level2">
+<h2 class="anchored" data-anchor-id="nivel-3-modelo-combinado-chl-a-biomasa-wa-invertebrados">8. Nivel 3: modelo combinado (Chl-a + biomasa + WA invertebrados)</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>train_base_comp <span class="ot">&lt;-</span> train_base <span class="sc">|&gt;</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wa_inv_train_f, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(site, visit, tp, chla_peri, bio_peri, tp_wa_inv_f)</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>test_base_comp <span class="ot">&lt;-</span> test_base <span class="sc">|&gt;</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(wa_inv_test_f, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(site, visit, tp,chla_peri,bio_peri,tp_wa_inv_f)</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">log10</span>(train_base_comp<span class="sc">$</span>tp_wa_inv_f))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>train_m3<span class="ot">&lt;-</span> train_base_comp <span class="sc">|&gt;</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(tp<span class="sc">&gt;=</span><span class="dv">0</span>, chla_peri<span class="sc">&gt;=</span><span class="dv">0</span>,bio_peri<span class="sc">&gt;=</span><span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">logtp =</span> <span class="fu">log10</span>(tp), <span class="at">logchla =</span> <span class="fu">log10</span>(chla_peri<span class="sc">+</span><span class="dv">1</span>),<span class="at">logbio =</span> <span class="fu">log10</span>(bio_peri<span class="sc">+</span><span class="dv">1</span>),<span class="at">logtp_wa_inv_f =</span> <span class="fu">log10</span>(tp_wa_inv_f))</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>test_m3<span class="ot">&lt;-</span> test_base_comp <span class="sc">|&gt;</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(tp<span class="sc">&gt;=</span><span class="dv">0</span>,chla_peri<span class="sc">&gt;=</span><span class="dv">0</span>,bio_peri<span class="sc">&gt;=</span><span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">logtp =</span> <span class="fu">log10</span>(tp), <span class="at">logchla =</span> <span class="fu">log10</span>(chla_peri<span class="sc">+</span><span class="dv">1</span>),<span class="at">logbio =</span> <span class="fu">log10</span>(bio_peri<span class="sc">+</span><span class="dv">1</span>),<span class="at">logtp_wa_inv_f =</span> <span class="fu">log10</span>(tp_wa_inv_f))</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>m3<span class="ot">&lt;-</span> <span class="fu">lm</span>(logtp <span class="sc">~</span> logchla <span class="sc">+</span> logbio<span class="sc">+</span>logtp_wa_inv_f, <span class="at">data =</span> train_m3)</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>test_m3<span class="sc">$</span>pred_logtp_m3 <span class="ot">&lt;-</span> <span class="fu">predict</span>(m3, <span class="at">newdata =</span> test_m3)</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>metricas_m3 <span class="ot">&lt;-</span> <span class="fu">model_metrics</span>(test_m3, <span class="at">obs_col =</span> <span class="st">"logtp"</span>, <span class="at">pred_col =</span> <span class="st">"pred_logtp_m3"</span>, <span class="at">model_name =</span> <span class="st">"Nivel 3"</span>)</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>metricas <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(metricas, metricas_m3)</span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) unir wa_inv_train/wa_inv_test y la version filtrada a train_base/test_base</span></span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) crear tp_wa_inv_sel segun el resultado de 7.5</span></span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) crear train_m3 y test_m3 con casos completos</span></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) ajustar: log10(tp) ~ log10(chla_peri) + log10(bio_peri) + tp_wa_inv_sel</span></span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 4) predecir en test_m3</span></span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 5) guardar metricas con model_metrics(...)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="comparar-desempeno-de-niveles-1-2-y-3" class="level2">
+<h2 class="anchored" data-anchor-id="comparar-desempeno-de-niveles-1-2-y-3">9. Comparar desempeno de niveles 1, 2 y 3</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>metricas<span class="ot">&lt;-</span>metricas<span class="sc">|&gt;</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AIC =</span> <span class="fu">c</span>(<span class="fu">AIC</span>(m1), <span class="fu">AIC</span>(m2), <span class="fu">AIC</span>(m3)))</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>metricas</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 7
+  modelo  n_test      r2  rmse   mae    sesgo   AIC
+  &lt;chr&gt;    &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
+1 Nivel 1   1906 0.00283 0.573 0.458  0.00770 3015.
+2 Nivel 2   1874 0.00267 0.575 0.461  0.0237  1422.
+3 Nivel 3   1876 0.342   0.464 0.361 -0.0138  1030.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Construye una tabla final con:</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="co"># modelo, n_test, r2, rmse, mae, sesgo, AIC</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>graf_m1<span class="ot">&lt;-</span><span class="fu">ggplot</span>(test_m1,<span class="fu">aes</span>(<span class="at">x =</span> logtp, <span class="at">y =</span> pred_logtp_m1)) <span class="sc">+</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color=</span><span class="st">"#CC5945"</span>) <span class="sc">+</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Valores observados vs predichos del modelo 1"</span>,</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">expression</span>(<span class="st">"TP observado ("</span><span class="sc">*</span>log[<span class="dv">10</span>]<span class="sc">*</span><span class="st">")"</span>),</span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">expression</span>(<span class="st">"TP predicho ("</span><span class="sc">*</span>log[<span class="dv">10</span>]<span class="sc">*</span><span class="st">")"</span>)</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>graf_m2<span class="ot">&lt;-</span><span class="fu">ggplot</span>(test_m2,<span class="fu">aes</span>(<span class="at">x =</span> logtp, <span class="at">y =</span> pred_logtp_m2)) <span class="sc">+</span></span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color=</span><span class="st">"#DAE336"</span>) <span class="sc">+</span></span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb58-15"><a href="#cb58-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Valores observados vs predichos del modelo 2"</span>,</span>
+<span id="cb58-16"><a href="#cb58-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">expression</span>(<span class="st">"TP observado ("</span><span class="sc">*</span>log[<span class="dv">10</span>]<span class="sc">*</span><span class="st">")"</span>),</span>
+<span id="cb58-17"><a href="#cb58-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">expression</span>(<span class="st">"TP predicho ("</span><span class="sc">*</span>log[<span class="dv">10</span>]<span class="sc">*</span><span class="st">")"</span>)</span>
+<span id="cb58-18"><a href="#cb58-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb58-19"><a href="#cb58-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb58-20"><a href="#cb58-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-21"><a href="#cb58-21" aria-hidden="true" tabindex="-1"></a>graf_m3<span class="ot">&lt;-</span><span class="fu">ggplot</span>(test_m3,<span class="fu">aes</span>(<span class="at">x =</span> logtp, <span class="at">y =</span> pred_logtp_m3)) <span class="sc">+</span></span>
+<span id="cb58-22"><a href="#cb58-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color=</span><span class="st">"#2B942B"</span>) <span class="sc">+</span></span>
+<span id="cb58-23"><a href="#cb58-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb58-24"><a href="#cb58-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb58-25"><a href="#cb58-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Valores observados vs predichos del modelo 2"</span>,</span>
+<span id="cb58-26"><a href="#cb58-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">expression</span>(<span class="st">"TP observado ("</span><span class="sc">*</span>log[<span class="dv">10</span>]<span class="sc">*</span><span class="st">")"</span>),</span>
+<span id="cb58-27"><a href="#cb58-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">expression</span>(<span class="st">"TP predicho ("</span><span class="sc">*</span>log[<span class="dv">10</span>]<span class="sc">*</span><span class="st">")"</span>)</span>
+<span id="cb58-28"><a href="#cb58-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb58-29"><a href="#cb58-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb58-30"><a href="#cb58-30" aria-hidden="true" tabindex="-1"></a>graf_m1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>graf_m2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-22-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>graf_m3</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-22-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>       <span class="co"># Tu codigo aqui</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Grafico: observado vs predicho por modelo</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="capa-de-interpretacion-con-peces-no-predictor" class="level2">
+<h2 class="anchored" data-anchor-id="capa-de-interpretacion-con-peces-no-predictor">10. Capa de interpretacion con peces (no predictor)</h2>
+<p>Despues de elegir el mejor modelo, usa su TP predicho para explorar patrones de peces en 2023-24.</p>
+<section id="construir-metricas-de-peces-por-sitio" class="level3">
+<h3 class="anchored" data-anchor-id="construir-metricas-de-peces-por-sitio">10.1 Construir metricas de peces por sitio</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>fish_train_long <span class="ot">&lt;-</span> fish_1819 <span class="sc">|&gt;</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, <span class="sc">!</span><span class="fu">is.na</span>(TOTAL)) <span class="sc">|&gt;</span></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(SITE_ID, VISIT_NO) <span class="sc">|&gt;</span></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">richness=</span> <span class="fu">n_distinct</span>(FINAL_NAME,<span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">abundance =</span> <span class="fu">sum</span>(TOTAL, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>fish_test_long <span class="ot">&lt;-</span> fish_2324 <span class="sc">|&gt;</span></span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, <span class="sc">!</span><span class="fu">is.na</span>(TOTAL)) <span class="sc">|&gt;</span></span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(SITE_ID, VISIT_NO) <span class="sc">|&gt;</span></span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">richness=</span> <span class="fu">n_distinct</span>(FINAL_NAME,<span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">abundance =</span> <span class="fu">sum</span>(TOTAL, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Sugerencias:</span></span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a><span class="co"># - filtrar VISIT_NO == 1</span></span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a><span class="co"># - excluir registros sin TOTAL</span></span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a><span class="co"># - riqueza = numero de especies (FINAL_NAME o TAXA_ID)</span></span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a><span class="co"># - abundancia_total = suma(TOTAL)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="relacionar-peces-con-tp-predicho" class="level3">
+<h3 class="anchored" data-anchor-id="relacionar-peces-con-tp-predicho">10.2 Relacionar peces con TP predicho</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) unir metricas de peces con TP predicho del mejor modelo</span></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) crear grupos (terciles) de TP predicho: bajo, medio, alto</span></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) comparar riqueza y abundancia entre grupos</span></span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>test_fish <span class="ot">&lt;-</span> fish_test_long <span class="sc">|&gt;</span></span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">site =</span> SITE_ID, <span class="at">visit =</span> VISIT_NO)<span class="sc">|&gt;</span></span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(test_m3, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(site, visit, richness, abundance, logtp,pred_logtp_m3)</span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>test_fish <span class="ot">&lt;-</span> test_fish <span class="sc">|&gt;</span></span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">tp_group =</span> <span class="fu">ntile</span>(pred_logtp_m3, <span class="dv">3</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">tp_group =</span> <span class="fu">factor</span>(tp_group, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Bajo"</span>, <span class="st">"Medio"</span>, <span class="st">"Alto"</span>)))</span>
+<span id="cb63-14"><a href="#cb63-14" aria-hidden="true" tabindex="-1"></a>comp_fish <span class="ot">&lt;-</span> test_fish <span class="sc">|&gt;</span></span>
+<span id="cb63-15"><a href="#cb63-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(tp_group) <span class="sc">|&gt;</span></span>
+<span id="cb63-16"><a href="#cb63-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(tp_group)) <span class="sc">|&gt;</span></span>
+<span id="cb63-17"><a href="#cb63-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_richness =</span> <span class="fu">mean</span>(richness, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb63-18"><a href="#cb63-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">sd_richness =</span> <span class="fu">sd</span>(richness, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb63-19"><a href="#cb63-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">mean_abundance =</span> <span class="fu">mean</span>(abundance, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb63-20"><a href="#cb63-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">sd_abundance =</span> <span class="fu">sd</span>(abundance, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb63-21"><a href="#cb63-21" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb63-22"><a href="#cb63-22" aria-hidden="true" tabindex="-1"></a>comp_fish</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 5
+  tp_group mean_richness sd_richness mean_abundance sd_abundance
+  &lt;fct&gt;            &lt;dbl&gt;       &lt;dbl&gt;          &lt;dbl&gt;        &lt;dbl&gt;
+1 Bajo              6.42        6.25           160.         226.
+2 Medio            12.8         8.55           263.         298.
+3 Alto             13.3         7.74           339.         344.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La riqueza y abundancia según el grupo de TP predicho  tienen una desviación estándar muy grande pero si observamos la media, el grupo de TP predicho alto y medio tienen una mayor riqueza y abundancia que el grupo bajo.Para ver si hay diferencias hago una prueba de Kruskal-Wallis para cada una de las dos.</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a><span class="fu">kruskal.test</span>(richness <span class="sc">~</span> tp_group, <span class="at">data =</span> test_fish)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Kruskal-Wallis rank sum test
+
+data:  richness by tp_group
+Kruskal-Wallis chi-squared = 269.55, df = 2, p-value &lt; 2.2e-16</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kruskal.test</span>(abundance <span class="sc">~</span> tp_group, <span class="at">data =</span> test_fish)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Kruskal-Wallis rank sum test
+
+data:  abundance by tp_group
+Kruskal-Wallis chi-squared = 148.78, df = 2, p-value &lt; 2.2e-16</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dunnTest</span>(richness <span class="sc">~</span> tp_group,</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">data =</span> test_fish,</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">method =</span> <span class="st">"holm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Comparison          Z      P.unadj        P.adj
+1  Alto - Bajo  14.966592 1.213847e-50 3.641541e-50
+2 Alto - Medio   1.646976 9.956296e-02 9.956296e-02
+3 Bajo - Medio -13.325885 1.636800e-40 3.273599e-40</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dunnTest</span>(abundance <span class="sc">~</span> tp_group,</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">data =</span> test_fish,</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">method =</span> <span class="st">"holm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Comparison         Z      P.unadj        P.adj
+1  Alto - Bajo 12.036582 2.282170e-33 6.846509e-33
+2 Alto - Medio  4.314045 1.602943e-05 1.602943e-05
+3 Bajo - Medio -7.726172 1.108289e-14 2.216578e-14</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="co"># La prueba de Kruskal-Wallis muestra que hay diferencias significativas en la riqueza y abundancia de peces entre los grupos de TP predicho (p &lt; 0.001). Esto sugiere que el nivel de TP predicho puede influir en la diversidad de especies de peces presentes en los sitios estudiados. Al hacer la prueba de Dunn para la riqueza obtengo que el grupo bajo es diferente al alto y al medio, pero la riqueza entre estos últimos dos no varía. En el caso de la abundancia los tres grupos  presentan diferencias significativas entre sí.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Graficos sugeridos:</span></span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a><span class="co"># - boxplot de riqueza por grupo TP predicho</span></span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>test_fish <span class="ot">&lt;-</span> test_fish <span class="sc">|&gt;</span></span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(tp_group))</span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>richness_fish<span class="ot">&lt;-</span><span class="fu">ggplot</span>(test_fish, <span class="fu">aes</span>(<span class="at">x =</span> tp_group, <span class="at">y =</span> richness)) <span class="sc">+</span></span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"lightblue"</span>) <span class="sc">+</span></span>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Riqueza de Peces por Grupo de TP Predicho"</span>,</span>
+<span id="cb74-9"><a href="#cb74-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Grupo de TP Predicho"</span>,</span>
+<span id="cb74-10"><a href="#cb74-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Riqueza de Peces"</span>) <span class="sc">+</span></span>
+<span id="cb74-11"><a href="#cb74-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb74-12"><a href="#cb74-12" aria-hidden="true" tabindex="-1"></a><span class="co"># - boxplot de abundancia por grupo TP predicho</span></span>
+<span id="cb74-13"><a href="#cb74-13" aria-hidden="true" tabindex="-1"></a>abundance_fish<span class="ot">&lt;-</span><span class="fu">ggplot</span>(test_fish, <span class="fu">aes</span>(<span class="at">x =</span> tp_group, <span class="at">y =</span> abundance)) <span class="sc">+</span></span>
+<span id="cb74-14"><a href="#cb74-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"lightblue"</span>) <span class="sc">+</span></span>
+<span id="cb74-15"><a href="#cb74-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Abundancia de Peces por Grupo de TP Predicho"</span>,</span>
+<span id="cb74-16"><a href="#cb74-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Grupo de TP Predicho"</span>,</span>
+<span id="cb74-17"><a href="#cb74-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Abundancia de Peces"</span>) <span class="sc">+</span></span>
+<span id="cb74-18"><a href="#cb74-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb74-19"><a href="#cb74-19" aria-hidden="true" tabindex="-1"></a>richness_fish</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>abundance_fish</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-25-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="preguntas-de-interpretacion" class="level3">
+<h3 class="anchored" data-anchor-id="preguntas-de-interpretacion">10.3 Preguntas de interpretacion</h3>
+<ol type="1">
+<li><p>¿Aumenta o disminuye la riqueza de peces cuando sube el TP predicho? La riqueza de peces aumenta cuando aumenta el TP predicho, porque los grupos medio y alto tienen una mayor riqueza que el grupo bajo.</p></li>
+<li><p>¿Hay especies que parecen asociarse a niveles altos de TP predicho?</p></li>
+</ol>
+<p>Para determinar si hay especies que se asocian a niveles altos de TP predicho, se podría realizar un análisis de correlación entre la abundancia de cada especie y los niveles de TP predicho.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Análisis de correlación entre abundancia de especies y niveles de TP predicho. Sin embargo, test_fish no tiene los datos de FINAL_NAME porque es la base asociada</span></span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>fish_abundance_tp<span class="ot">&lt;-</span>fish_2324 <span class="sc">|&gt;</span></span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, <span class="sc">!</span><span class="fu">is.na</span>(TOTAL)) <span class="sc">|&gt;</span></span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(test_fish, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"SITE_ID"</span> <span class="ot">=</span> <span class="st">"site"</span>, <span class="st">"VISIT_NO"</span> <span class="ot">=</span> <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(FINAL_NAME, TOTAL, pred_logtp_m3) <span class="sc">|&gt;</span></span>
+<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(FINAL_NAME) <span class="sc">|&gt;</span></span>
+<span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">sum</span>(<span class="fu">complete.cases</span> (TOTAL, pred_logtp_m3)), <span class="at">cor_tp =</span> <span class="fu">ifelse</span>(n<span class="sc">&gt;=</span><span class="dv">2</span>, <span class="fu">cor</span>(TOTAL, pred_logtp_m3, <span class="at">use =</span> <span class="st">"complete.obs"</span>),<span class="cn">NA</span>),</span>
+<span id="cb76-8"><a href="#cb76-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb76-9"><a href="#cb76-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(cor_tp))</span>
+<span id="cb76-10"><a href="#cb76-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-11"><a href="#cb76-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Hay varias especies que parecen tener correlación  perfecta con el TP predicho, pero esto puede deberse a que solo tienen 2 observaciones. Por eso ahora aumento a las que tengan al menos 5 observaciones.</span></span>
+<span id="cb76-12"><a href="#cb76-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-13"><a href="#cb76-13" aria-hidden="true" tabindex="-1"></a>fish_abundance_tp5<span class="ot">&lt;-</span>fish_2324 <span class="sc">|&gt;</span></span>
+<span id="cb76-14"><a href="#cb76-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VISIT_NO <span class="sc">==</span> <span class="dv">1</span>, <span class="sc">!</span><span class="fu">is.na</span>(TOTAL)) <span class="sc">|&gt;</span></span>
+<span id="cb76-15"><a href="#cb76-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(test_fish, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"SITE_ID"</span> <span class="ot">=</span> <span class="st">"site"</span>, <span class="st">"VISIT_NO"</span> <span class="ot">=</span> <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb76-16"><a href="#cb76-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(FINAL_NAME, TOTAL, pred_logtp_m3) <span class="sc">|&gt;</span></span>
+<span id="cb76-17"><a href="#cb76-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(FINAL_NAME) <span class="sc">|&gt;</span></span>
+<span id="cb76-18"><a href="#cb76-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">sum</span>(<span class="fu">complete.cases</span> (TOTAL, pred_logtp_m3)), <span class="at">cor_tp =</span> <span class="fu">ifelse</span>(n<span class="sc">&gt;=</span><span class="dv">5</span>, <span class="fu">cor</span>(TOTAL, pred_logtp_m3, <span class="at">use =</span> <span class="st">"complete.obs"</span>),<span class="cn">NA</span>),</span>
+<span id="cb76-19"><a href="#cb76-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb76-20"><a href="#cb76-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(cor_tp))</span>
+<span id="cb76-21"><a href="#cb76-21" aria-hidden="true" tabindex="-1"></a><span class="co">#   BRIDGELIP SUCKER y BLUNTFACE SHINER son las especies que tienen una mayor correlación positiva en términos de abundancia con el TP predicho</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ol start="3" type="1">
+<li>¿Los patrones de peces son consistentes con la interpretacion del modelo quimico-biologico? La riqueza no, ya que a mayores concentraciones de fósforo (que se asocia con eutrifización) se espera menor riqueza de peces, pero en este caso la riqueza aumenta. La abundancia sí es consistente con lo esperado ya que aumenta conforme aumenta el fósforo.</li>
+</ol>
+</section>
+</section>
+<section id="interpretacion-de-invertebrados-como-taxa-indicadores" class="level2">
+<h2 class="anchored" data-anchor-id="interpretacion-de-invertebrados-como-taxa-indicadores">11. Interpretacion de invertebrados como taxa indicadores</h2>
+<p>En esta seccion vas a usar los optimos WA (<code>inv_optima</code>) para explorar potencial de taxa indicadores.</p>
+<section id="optimo-por-genero-color-por-familia" class="level3">
+<h3 class="anchored" data-anchor-id="optimo-por-genero-color-por-familia">11.1 Optimo por genero (color por familia)</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Objetivo:</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) construir una tabla por taxon con columnas de taxonomia (al menos GENUS y FAMILY)</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) unir con inv_optima</span></span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) graficar optimum_logtp por genero, coloreado por familia</span></span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>taxonomy <span class="ot">&lt;-</span> inv_1819 <span class="sc">|&gt;</span></span>
+<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(TARGET_TAXON, FAMILY, GENUS)</span>
+<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>taxonomy_optima <span class="ot">&lt;-</span> inv_optima <span class="sc">|&gt;</span></span>
+<span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(taxonomy, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"taxon"</span> <span class="ot">=</span> <span class="st">"TARGET_TAXON"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb77-11"><a href="#cb77-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(taxon, optimum_logtp, FAMILY, GENUS)</span>
+<span id="cb77-12"><a href="#cb77-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-13"><a href="#cb77-13" aria-hidden="true" tabindex="-1"></a>graf_opt<span class="ot">&lt;-</span><span class="fu">ggplot</span>(taxonomy_optima, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(GENUS, optimum_logtp), <span class="at">y =</span> optimum_logtp, <span class="at">color =</span> FAMILY)) <span class="sc">+</span></span>
+<span id="cb77-14"><a href="#cb77-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb77-15"><a href="#cb77-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Óptimos de TP por Género"</span>,</span>
+<span id="cb77-16"><a href="#cb77-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Genero"</span>,</span>
+<span id="cb77-17"><a href="#cb77-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Óptimo de log10(TP)"</span>,</span>
+<span id="cb77-18"><a href="#cb77-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Familia"</span>) <span class="sc">+</span></span>
+<span id="cb77-19"><a href="#cb77-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()<span class="sc">+</span></span>
+<span id="cb77-20"><a href="#cb77-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb77-21"><a href="#cb77-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
+<span id="cb77-22"><a href="#cb77-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Hay muchos géneros por lo que el gráfico no queda legible.</span></span>
+<span id="cb77-23"><a href="#cb77-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-24"><a href="#cb77-24" aria-hidden="true" tabindex="-1"></a>graf_opt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sugerencia de salida:</span></span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a><span class="co"># - eje x: reorder(genero, optimum_logtp)</span></span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a><span class="co"># - eje y: optimum_logtp</span></span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a><span class="co"># - color: familia</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="taxa-con-optimo-bien-definido-vs-respuesta-plana" class="level3">
+<h3 class="anchored" data-anchor-id="taxa-con-optimo-bien-definido-vs-respuesta-plana">11.2 Taxa con optimo bien definido vs respuesta plana</h3>
+<p>Selecciona 3-5 taxa y grafica abundancia a lo largo del gradiente de TP (train).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tu codigo aqui</span></span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Ideas:</span></span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) usar inv_train_long unido con tp_1819 (o logtp)</span></span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) agrupar TP en bins (por ejemplo quintiles)</span></span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) calcular abundancia media por taxon x bin</span></span>
+<span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 4) graficar curvas por taxon</span></span>
+<span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Primero quiero ver cuales son los taxones que salen en mayor cantidad de sitios</span></span>
+<span id="cb79-9"><a href="#cb79-9" aria-hidden="true" tabindex="-1"></a>taxon_abundance <span class="ot">&lt;-</span> inv_train_long <span class="sc">|&gt;</span></span>
+<span id="cb79-10"><a href="#cb79-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(taxon) <span class="sc">|&gt;</span></span>
+<span id="cb79-11"><a href="#cb79-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_sites =</span> <span class="fu">n_distinct</span>(site), <span class="at">total_abundance =</span> <span class="fu">sum</span>(abundance, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb79-12"><a href="#cb79-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n_sites))</span>
+<span id="cb79-13"><a href="#cb79-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-14"><a href="#cb79-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Ahora selecciono los 5 taxones con mayor cantidad de sitios</span></span>
+<span id="cb79-15"><a href="#cb79-15" aria-hidden="true" tabindex="-1"></a>top_taxa <span class="ot">&lt;-</span> taxon_abundance <span class="sc">|&gt;</span> </span>
+<span id="cb79-16"><a href="#cb79-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb79-17"><a href="#cb79-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(taxon)</span>
+<span id="cb79-18"><a href="#cb79-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-19"><a href="#cb79-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Ahora uno los datos de abundancia con los datos de TP</span></span>
+<span id="cb79-20"><a href="#cb79-20" aria-hidden="true" tabindex="-1"></a>tp_unique <span class="ot">&lt;-</span> tp_1819 <span class="sc">|&gt;</span></span>
+<span id="cb79-21"><a href="#cb79-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(site, visit) <span class="sc">|&gt;</span></span>
+<span id="cb79-22"><a href="#cb79-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">tp =</span> <span class="fu">mean</span>(tp, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb79-23"><a href="#cb79-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-24"><a href="#cb79-24" aria-hidden="true" tabindex="-1"></a>inv_tp_data <span class="ot">&lt;-</span> inv_train_long <span class="sc">|&gt;</span></span>
+<span id="cb79-25"><a href="#cb79-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(taxon <span class="sc">%in%</span> top_taxa) <span class="sc">|&gt;</span></span>
+<span id="cb79-26"><a href="#cb79-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">left_join</span>(tp_unique <span class="sc">|&gt;</span> <span class="fu">select</span>(site, visit, tp), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"site"</span>, <span class="st">"visit"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb79-27"><a href="#cb79-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(tp)) <span class="sc">|&gt;</span></span>
+<span id="cb79-28"><a href="#cb79-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">tp_bin =</span> <span class="fu">cut</span>(tp, <span class="at">breaks =</span> <span class="fu">quantile</span>(tp, <span class="at">probs =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.2</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>, <span class="at">include.lowest =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb79-29"><a href="#cb79-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-30"><a href="#cb79-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Ahora calculo la abundancia media por taxon y bin de TP</span></span>
+<span id="cb79-31"><a href="#cb79-31" aria-hidden="true" tabindex="-1"></a>abundance_by_bin <span class="ot">&lt;-</span> inv_tp_data <span class="sc">|&gt;</span></span>
+<span id="cb79-32"><a href="#cb79-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(tp_bin)) <span class="sc">|&gt;</span></span>
+<span id="cb79-33"><a href="#cb79-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(taxon, tp_bin) <span class="sc">|&gt;</span></span>
+<span id="cb79-34"><a href="#cb79-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_abundance =</span> <span class="fu">mean</span>(abundance, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb79-35"><a href="#cb79-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-36"><a href="#cb79-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Y ahora grafico las curvas de abundancia por taxon a lo largo del gradiente de TP</span></span>
+<span id="cb79-37"><a href="#cb79-37" aria-hidden="true" tabindex="-1"></a>graf_abund_inv<span class="ot">&lt;-</span><span class="fu">ggplot</span>(abundance_by_bin, <span class="fu">aes</span>(<span class="at">x =</span> tp_bin, <span class="at">y =</span> mean_abundance, <span class="at">group =</span> taxon, <span class="at">color =</span> taxon)) <span class="sc">+</span></span>
+<span id="cb79-38"><a href="#cb79-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb79-39"><a href="#cb79-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb79-40"><a href="#cb79-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Curvas de abundancia por taxa a lo largo del gradiente de TP"</span>,</span>
+<span id="cb79-41"><a href="#cb79-41" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Bin de TP"</span>,  <span class="at">y =</span> <span class="st">"Abundancia promedio"</span>) <span class="sc">+</span></span>
+<span id="cb79-42"><a href="#cb79-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb79-43"><a href="#cb79-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))  </span>
+<span id="cb79-44"><a href="#cb79-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb79-45"><a href="#cb79-45" aria-hidden="true" tabindex="-1"></a>graf_abund_inv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="preguntas-de-interpretacion-1" class="level3">
+<h3 class="anchored" data-anchor-id="preguntas-de-interpretacion-1">11.3 Preguntas de interpretacion</h3>
+<ol type="1">
+<li><p>¿Que generos muestran optimos extremos (muy bajos o muy altos de TP)? EUCAPNOPSIS y PANISUS muestran los óptimos más bajos de TP, mientras que CHIRONOMIDAE gen indet, HYDRELLIA y CHLOROTABANUS los óptimos de TP más altos</p></li>
+<li><p>¿Que familias concentran taxa con optimos similares? Calculo la desviación estándar de los óptimos por familia y los que tengan la menor sd son los que concentran taxa con óptimos más similares. Lo hago de esta forma porque el gráfico es poco legible.</p></li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>family_summary <span class="ot">&lt;-</span> taxonomy_optima <span class="sc">|&gt;</span></span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(FAMILY) <span class="sc">|&gt;</span></span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_generos =</span> <span class="fu">n</span>(),</span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd =</span> <span class="fu">sd</span>(optimum_logtp, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb80-6"><a href="#cb80-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb80-7"><a href="#cb80-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb80-8"><a href="#cb80-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(sd)</span>
+<span id="cb80-9"><a href="#cb80-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-10"><a href="#cb80-10" aria-hidden="true" tabindex="-1"></a>family_summary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 188 × 3
+   FAMILY         n_generos     sd
+   &lt;chr&gt;              &lt;int&gt;  &lt;dbl&gt;
+ 1 THIARIDAE              2 0.0125
+ 2 ANCYLIDAE              3 0.0285
+ 3 SPERCHONIDAE           2 0.0507
+ 4 SISYRIDAE              2 0.0543
+ 5 OLIGONEURIIDAE         2 0.0560
+ 6 ODONTOCERIDAE          4 0.0694
+ 7 PROTZIIDAE             2 0.0709
+ 8 EPHEMERELLIDAE        13 0.0730
+ 9 APATANIIDAE            3 0.0747
+10 LEBERTIIDAE            2 0.0828
+# ℹ 178 more rows</code></pre>
+</div>
+</div>
+<ol start="3" type="1">
+<li>¿Que taxa parecen tener un optimo bien definido y cuales una respuesta mas plana?</li>
+</ol>
+<p>De las cinco elegidas, THIENEMANNIMYIA y CERATOPOGONINAE muestran respuestas más planas, mientras que TANYTSARSUS parece tener un óptimo más definido, ya que su curva de abundancia muestra un pico claro en un rango específico de TP.</p>
+<ol start="4" type="1">
+<li>¿Cuales propondrías como potenciales indicadores y por que?</li>
+</ol>
+<p>De las 5 analizadas, propondía como potencial indicadoras a POLYPEDILUM y a TANYTARSUS porque parecen responder de forma más predecible a los nivles de fósforo.</p>
+</section>
+</section>
+<section id="entregables" class="level2">
+<h2 class="anchored" data-anchor-id="entregables">12. Entregables</h2>
+<ol type="1">
+<li>QMD con todo el flujo <strong>reproducible</strong>. Toman en cuenta donde estan los archivos de datos y no asumen que estan en el mismo directorio que el QMD. Pueden restructurar los datos y codigo en subcarpetas or organizar como les sirve a ustedes, siempre que sea reproducible y que se puede entender y ejecutar. Idealmente, comparten el codigo con los datos como una carpeta comprimida (zip) o un repositorio de GitHub, asi puedo ejecutar el flujo completo y obtener los resultados.<br>
+</li>
+<li>Tabla comparativa de desempeno de modelos (niveles 1, 2, 3).</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>metricas</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 7
+  modelo  n_test      r2  rmse   mae    sesgo   AIC
+  &lt;chr&gt;    &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
+1 Nivel 1   1906 0.00283 0.573 0.458  0.00770 3015.
+2 Nivel 2   1874 0.00267 0.575 0.461  0.0237  1422.
+3 Nivel 3   1876 0.342   0.464 0.361 -0.0138  1030.</code></pre>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Grafico observado vs predicho por modelo.</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>graf_m1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>graf_m2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-31-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>graf_m3</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-31-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ol start="4" type="1">
+<li>Dos graficos de interpretacion de peces.</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>richness_fish</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>abundance_fish</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-32-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ol start="5" type="1">
+<li>Dos graficos de interpretacion de invertebrados (optimos y curvas de abundancia).</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>graf_opt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>graf_abund_inv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="streams-index-tarea_files/figure-html/unnamed-chunk-33-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ol start="6" type="1">
+<li>Discusion corta (5-10 lineas por seccion).</li>
+</ol>
+<section id="sección-1" class="level3">
+<h3 class="anchored" data-anchor-id="sección-1">Sección 1:</h3>
+<p>En esta parte cargué las librerías que iba a usar y también definí las funciones para las métricas. También definí que para evitar los problemas al hacer transformaciones con log10 iba a filtrar los ceros.</p>
+</section>
+<section id="sección-2" class="level3">
+<h3 class="anchored" data-anchor-id="sección-2">Sección 2:</h3>
+<p>En esta parte cargué los archivos que iba a usar, los de 2018/2019 como train y los de 2023/2024 como test.</p>
+</section>
+<section id="sección-3" class="level3">
+<h3 class="anchored" data-anchor-id="sección-3">Sección 3:</h3>
+<p>En esta parte armonicé los dataframes antes de unirlos en la base de train o de test según correspondiera. En esta parte elijo eliminar los uid porque algunos tienen códigos distintos para el mismo sitio.</p>
+</section>
+<section id="sección-4" class="level3">
+<h3 class="anchored" data-anchor-id="sección-4">Sección 4:</h3>
+<p>En esta sección hice un EDA y viendo los histogramas decidí realizar la transformación log 10 para TP y los predicotores. Al hacer esta transformación, la distribución se vuelve más asimilar a una normal.</p>
+</section>
+<section id="sección-5" class="level3">
+<h3 class="anchored" data-anchor-id="sección-5">Sección 5:</h3>
+<p>En esta parte hice el modelo 1 donde solo de toma el log10 de TP como respuesta y el log10 de chla como predictora. Este modelo tiene un R2 muy bajo, por lo que no es muy bueno</p>
+</section>
+<section id="sección-6" class="level3">
+<h3 class="anchored" data-anchor-id="sección-6">Sección 6:</h3>
+<p>En esta parte hice el modelo 2 donde agrego el log10 de biomasa como variable predictora. Las métricas siguen siendo malas. Las variables predictoras muestran una correlación significativa pero ambas aportan de manera independiente.</p>
+</section>
+<section id="sección-7" class="level3">
+<h3 class="anchored" data-anchor-id="sección-7">Sección 7:</h3>
+<p>En esta sección preparo la parte de macroinvertebrados para poderla agregar luego como variable predictora. Para esto fue necesario calcular los óptimos y remover los taxones raros.</p>
+</section>
+<section id="sección-8" class="level3">
+<h3 class="anchored" data-anchor-id="sección-8">Sección 8:</h3>
+<p>En esta sección ya agrego la variable de macroinvertebrados con promedios ponderados siguiendo lo realizado para los otros dos modelos. De igual forma calculo las métricas para luego poder comparar.</p>
+</section>
+<section id="sección-9" class="level3">
+<h3 class="anchored" data-anchor-id="sección-9">Sección 9:</h3>
+<p>En esta sección comparé los tres modelos utilizando las métricas y viendo los gráficos de observado vs predicho. El modelo 3 es el mejor porque tiene un r2 mayor y un rmse, un mae y un AIC menor a los otros dos modelos. Sin embargo, sigue siendo un r2 bajo por lo que talvez sea necesario agregar otras variables predictoras.</p>
+</section>
+<section id="sección-10" class="level3">
+<h3 class="anchored" data-anchor-id="sección-10">Sección 10:</h3>
+<p>Esta sección fue para explorar patrones de peces usando el TP predicho por el modelo que elegí, que fue el 3.Para esto utilicé la riqueza y abundancia de los peces y lo relacioné al TP predicho. Curiosamente tanto la riqueza como la abundancia de peces fue mayor conforme aumentaba el TP predicho.</p>
+</section>
+<section id="sección-11" class="level3">
+<h3 class="anchored" data-anchor-id="sección-11">Sección 11:</h3>
+<p>En esta sección exploré los invertebrados como potenciales indicadores. Hay algunos géneros que sí parecen estar respondiendo al valor del fósforo pero otros cuya respuesta es plana, por lo que para verificar su potencial como indicadores es necesario verificar cuales son los taxas con respuesta al TP.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

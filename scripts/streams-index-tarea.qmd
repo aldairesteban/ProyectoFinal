@@ -1,5 +1,6 @@
 ---
 title: "Tarea: Índice de nutrientes en ríos (NRSA 2018-19 -> 2023-24)"
+author: "Aldair Bejarano Tortós"
 format: html
 execute:
   warning: false
@@ -472,8 +473,7 @@ taxa_validos <- inv_train_long |>
 # Paso B: crear versiones filtradas
 inv_train_long_f <- inv_train_long |> dplyr::semi_join(taxa_validos, by = "taxon")
 inv_test_long_f  <- inv_test_long  |> dplyr::semi_join(taxa_validos, by = "taxon")
-nrow(wa_inv_test)
-nrow(wa_inv_test_f)
+
 # Paso C: recalcular optimos y WA por sitio con la version filtrada
 inv_optima_f <- inv_train_long_f |>
     left_join(train_base |>
@@ -501,6 +501,8 @@ wa_inv_test_f <- inv_test_long_f |>
     tp_wa_inv_f = 10^logtp_wa_f,
     .groups = "drop"
   )
+nrow(wa_inv_test)
+nrow(wa_inv_test_f)
 # Salidas esperadas:
 # wa_inv_train_f: uid, site, visit, tp_wa_inv_f
 # wa_inv_test_f:  uid, site, visit, tp_wa_inv_f
@@ -580,24 +582,38 @@ metricas
 ```
 
 ```{r}
-ggplot(test_m1,aes(x = logtp, y = pred_logtp_m1)) +
+graf_m1<-ggplot(test_m1,aes(x = logtp, y = pred_logtp_m1)) +
   geom_point(color="#CC5945") +
-  labs(title = "Nivel 1: Observado vs Predicho",
-       x = "Log10(TP Observado)",
-       y = "Log10(TP Predicho)") +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(
+    title = "Valores observados vs predichos del modelo 1",
+    x = expression("TP observado ("*log[10]*")"),
+    y = expression("TP predicho ("*log[10]*")")
+  ) +
   theme_classic()
-ggplot(test_m2,aes(x = logtp, y = pred_logtp_m2)) +
+
+graf_m2<-ggplot(test_m2,aes(x = logtp, y = pred_logtp_m2)) +
   geom_point(color="#DAE336") +
-  labs(title = "Nivel 2: Observado vs Predicho",
-       x = "Log10(TP Observado)",
-       y = "Log10(TP Predicho)") +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(
+    title = "Valores observados vs predichos del modelo 2",
+    x = expression("TP observado ("*log[10]*")"),
+    y = expression("TP predicho ("*log[10]*")")
+  ) +
   theme_classic()
-ggplot(test_m3,aes(x = logtp, y = pred_logtp_m3)) +
+
+graf_m3<-ggplot(test_m3,aes(x = logtp, y = pred_logtp_m3)) +
   geom_point(color="#2B942B") +
-  labs(title = "Nivel 3: Observado vs Predicho",
-       x = "Log10(TP Observado)",
-       y = "Log10(TP Predicho)") +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(
+    title = "Valores observados vs predichos del modelo 2",
+    x = expression("TP observado ("*log[10]*")"),
+    y = expression("TP predicho ("*log[10]*")")
+  ) +
   theme_classic()
+graf_m1
+graf_m2
+graf_m3
        # Tu codigo aqui
 # Grafico: observado vs predicho por modelo
 ```
@@ -674,19 +690,21 @@ dunnTest(abundance ~ tp_group,
 # - boxplot de riqueza por grupo TP predicho
 test_fish <- test_fish |>
   filter(!is.na(tp_group))
-ggplot(test_fish, aes(x = tp_group, y = richness)) +
+richness_fish<-ggplot(test_fish, aes(x = tp_group, y = richness)) +
   geom_boxplot(fill = "lightblue") +
   labs(title = "Riqueza de Peces por Grupo de TP Predicho",
        x = "Grupo de TP Predicho",
        y = "Riqueza de Peces") +
   theme_classic()
 # - boxplot de abundancia por grupo TP predicho
-ggplot(test_fish, aes(x = tp_group, y = abundance)) +
+abundance_fish<-ggplot(test_fish, aes(x = tp_group, y = abundance)) +
   geom_boxplot(fill = "lightblue") +
   labs(title = "Abundancia de Peces por Grupo de TP Predicho",
        x = "Grupo de TP Predicho",
        y = "Abundancia de Peces") +
   theme_classic()
+richness_fish
+abundance_fish
 ```
 
 ### 10.3 Preguntas de interpretacion
@@ -696,7 +714,7 @@ La riqueza de peces aumenta cuando aumenta el TP predicho, porque los grupos med
 
 2. ¿Hay especies que parecen asociarse a niveles altos de TP predicho?
 
-Para determinar si hay especies que se asocian a niveles altos de TP predicho, se podría realizar un análisis de correlación entre la abundancia de cada especie y los niveles de TP predicho. Sin embargo, con la información proporcionada, no se puede identificar directamente qué especies están asociadas a niveles altos de TP predicho.
+Para determinar si hay especies que se asocian a niveles altos de TP predicho, se podría realizar un análisis de correlación entre la abundancia de cada especie y los niveles de TP predicho. 
 ```{r}
 # Análisis de correlación entre abundancia de especies y niveles de TP predicho. Sin embargo, test_fish no tiene los datos de FINAL_NAME porque es la base asociada
 fish_abundance_tp<-fish_2324 |>
@@ -746,7 +764,7 @@ taxonomy_optima <- inv_optima |>
   left_join(taxonomy, by = c("taxon" = "TARGET_TAXON")) |>
   distinct(taxon, optimum_logtp, FAMILY, GENUS)
 
-ggplot(taxonomy_optima, aes(x = reorder(GENUS, optimum_logtp), y = optimum_logtp, color = FAMILY)) +
+graf_opt<-ggplot(taxonomy_optima, aes(x = reorder(GENUS, optimum_logtp), y = optimum_logtp, color = FAMILY)) +
   geom_point() +
   labs(title = "Óptimos de TP por Género",
        x = "Genero",
@@ -757,6 +775,7 @@ ggplot(taxonomy_optima, aes(x = reorder(GENUS, optimum_logtp), y = optimum_logtp
     legend.position = "none")
 # Hay muchos géneros por lo que el gráfico no queda legible.
 
+graf_opt
 # Sugerencia de salida:
 # - eje x: reorder(genero, optimum_logtp)
 # - eje y: optimum_logtp
@@ -804,7 +823,7 @@ abundance_by_bin <- inv_tp_data |>
   summarise(mean_abundance = mean(abundance, na.rm = TRUE), .groups = "drop")
 
 # Y ahora grafico las curvas de abundancia por taxon a lo largo del gradiente de TP
-ggplot(abundance_by_bin, aes(x = tp_bin, y = mean_abundance, group = taxon, color = taxon)) +
+graf_abund_inv<-ggplot(abundance_by_bin, aes(x = tp_bin, y = mean_abundance, group = taxon, color = taxon)) +
   geom_line() +
   geom_point() +
   labs(title = "Curvas de abundancia por taxa a lo largo del gradiente de TP",
@@ -812,6 +831,7 @@ ggplot(abundance_by_bin, aes(x = tp_bin, y = mean_abundance, group = taxon, colo
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 
+graf_abund_inv
 ```
 
 ### 11.3 Preguntas de interpretacion
@@ -849,7 +869,62 @@ De las 5 analizadas, propondía como potencial indicadoras a POLYPEDILUM y a TAN
 
 1. QMD con todo el flujo **reproducible**. Toman en cuenta donde estan los archivos de datos y no asumen que estan en el mismo directorio que el QMD. Pueden restructurar los datos y codigo en subcarpetas or organizar como les sirve a ustedes, siempre que sea reproducible y que se  puede entender y ejecutar. Idealmente, comparten el codigo con los datos como una carpeta comprimida (zip) o un repositorio de GitHub, asi puedo ejecutar el flujo completo y obtener los resultados.  
 2. Tabla comparativa de desempeno de modelos (niveles 1, 2, 3).
+```{r}
+metricas
+```
+
 3. Grafico observado vs predicho por modelo.
+```{r}
+graf_m1
+graf_m2
+graf_m3
+```
+
 4. Dos graficos de interpretacion de peces.
+
+```{r}
+richness_fish
+abundance_fish
+```
+
 5. Dos graficos de interpretacion de invertebrados (optimos y curvas de abundancia).
+
+```{r}
+graf_opt
+graf_abund_inv
+```
+
 6. Discusion corta (5-10 lineas por seccion).
+
+### Sección 1: 
+En esta parte cargué las librerías que iba a usar y también definí las funciones para las métricas. También definí que para evitar los problemas al hacer transformaciones con log10 iba a filtrar los ceros.
+
+### Sección 2: 
+En esta parte cargué los archivos que iba a usar, los de 2018/2019 como train y los de 2023/2024 como test.
+
+### Sección 3: 
+En esta parte armonicé los dataframes antes de unirlos en la base de train o de test según correspondiera. En esta parte elijo eliminar los uid porque algunos tienen códigos distintos para el mismo sitio. 
+
+### Sección 4: 
+En esta sección hice un EDA y viendo los histogramas decidí realizar la transformación log 10 para TP y los predicotores. Al hacer esta transformación, la distribución se vuelve más asimilar a una normal.
+
+### Sección 5: 
+En esta parte hice el modelo 1 donde solo de toma el log10 de TP como respuesta y el log10 de chla como predictora. Este modelo tiene un R2 muy bajo, por lo que no es muy bueno
+
+### Sección 6: 
+En esta parte hice el modelo 2 donde agrego el log10 de biomasa como variable predictora. Las métricas siguen siendo malas. Las variables predictoras muestran una correlación significativa pero ambas aportan de manera independiente.
+
+### Sección 7: 
+En esta sección preparo la parte de macroinvertebrados para poderla agregar luego como variable predictora. Para esto fue necesario calcular los óptimos y remover los taxones raros.
+
+### Sección 8: 
+En esta sección ya agrego la variable de macroinvertebrados con promedios ponderados siguiendo lo realizado para los otros dos modelos. De igual forma calculo las métricas para luego poder comparar.
+
+### Sección 9: 
+En esta sección comparé los tres modelos utilizando las métricas y viendo los gráficos de observado vs predicho. El modelo 3 es el mejor porque tiene un r2 mayor y un rmse, un mae y un AIC menor a los otros dos modelos. Sin embargo, sigue siendo un r2 bajo por lo que talvez sea necesario agregar otras variables predictoras.
+
+### Sección 10: 
+Esta sección fue para explorar patrones de peces usando el TP predicho por el modelo que elegí, que fue el 3.Para esto utilicé la riqueza y abundancia de los peces y lo relacioné al TP predicho. Curiosamente tanto la riqueza como la abundancia de peces fue mayor conforme aumentaba el TP predicho.
+
+### Sección 11: 
+En esta sección exploré los invertebrados como potenciales indicadores. Hay algunos géneros que sí parecen estar respondiendo al valor del fósforo pero otros cuya respuesta es plana, por lo que para verificar su potencial como indicadores es necesario verificar cuales son los taxas con respuesta al TP.
