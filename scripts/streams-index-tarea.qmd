@@ -36,6 +36,7 @@ library("tidyr")
 library("ggplot2")
 library("car")
 library("FSA")
+
 ```
 
 ## 1.1 Funciones utiles para evaluar modelos
@@ -209,6 +210,7 @@ pbio_test <- pbio_2324 |>
   transmute(site = SITE_ID, visit = VISIT_NO, bio_peri = RESULT_VOL)
 
 #Elijo esta medida porque tiene mayor cantidad de mediciones
+
 ```
 
 ### 3.4 Construir tablas de modelado train/test
@@ -373,6 +375,17 @@ cor.test(log10(train_base$chla_peri),
          method = "pearson")
 vif(m2)
 
+
+# Gráfico correlaión
+ggplot(train_base, aes(x = log10(chla_peri), y = log10(bio_peri))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(
+    title = "Correlación entre Chl-a y Biomasa de Perifiton",
+    x = expression("log10(Chl-a)"),
+    y = expression("log10(Biomasa)")
+  ) +
+  theme_classic()
 # Preguntas:
 # - chla_peri y bio_peri estan correlacionadas?
 # La prueba de correlación de Pearson muestra que hay una correlación significativa entre los logaritmos de las variables (r2=0.18, p<0.001)
@@ -606,7 +619,7 @@ graf_m3<-ggplot(test_m3,aes(x = logtp, y = pred_logtp_m3)) +
   geom_point(color="#2B942B") +
   geom_smooth(method = "lm", se = FALSE, color = "blue") +
   labs(
-    title = "Valores observados vs predichos del modelo 2",
+    title = "Valores observados vs predichos del modelo 3",
     x = expression("TP observado ("*log[10]*")"),
     y = expression("TP predicho ("*log[10]*")")
   ) +

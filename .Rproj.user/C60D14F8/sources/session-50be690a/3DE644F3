@@ -3,7 +3,7 @@
     "path": "~/UCR/Limnologia/ProyectoFinal/scripts/streams-index-tarea.qmd",
     "project_path": "scripts/streams-index-tarea.qmd",
     "type": "quarto_markdown",
-    "hash": "554396901",
+    "hash": "2614643279",
     "contents": "",
     "dirty": false,
     "created": 1783363462889.0,
@@ -12,17 +12,17 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "104,37",
-        "scrollLine": "100",
+        "cursorPosition": "621,57",
+        "scrollLine": "609",
         "chunk_output_type": "console",
         "docOutlineVisible": "1"
     },
     "folds": "",
-    "lastKnownWriteTime": 1783401939,
+    "lastKnownWriteTime": 1783457411,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1783401939830,
+    "last_content_update": 1783457411430,
     "read_only": false,
     "read_only_alternatives": []
 }
